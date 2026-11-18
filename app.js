@@ -500,7 +500,15 @@
           '</legend><div class="form three"><label><span>Label on the unit at the counter</span><select name="label-' +
           l.num +
           '"><option value="">Not back yet</option>' +
-          opts(unitsOf(a.type).map((u) => [u.id, unitName(u)])) +
+          // Every unit of the type is listed, so the choice only matches the
+          // slip if someone reads the label. Units in repair stay in the list
+          // (one turning up at the counter is worth knowing) but are marked.
+          opts(
+            unitsOf(a.type).map((u) => [
+              u.id,
+              unitName(u) + (inRepair(u.id) ? " · recorded in repair" : ""),
+            ]),
+          ) +
           "</select></label><label class=\"ifout\"><span>If not back, who has it?</span><select name=\"holder-" +
           l.num +
           '">' +
@@ -842,6 +850,16 @@
       if (label) {
         if (label !== l.asset) {
           const other = getAsset(label);
+          if (inRepair(label))
+            return showError(
+              f,
+              other.id +
+                " is recorded as in repair, not on loan. Don’t shelve it. Check with the workshop, and leave slip L-" +
+                l.num +
+                " open until " +
+                a.id +
+                " comes back.",
+            );
           const where = out(label)
             ? " It is out on slip L-" + out(label).num + "."
             : " It should be on shelf " + other.bin + ".";

@@ -36,7 +36,9 @@ Campus Stores is a Product Engineer work sample set at a fictional campus media 
 
 **3. Check in by reading the label, and hand over whatever is still out.**
 - For each open slip, choose the **label on the unit at the counter**. The form shows which unit the slip is for, e.g. *“slip L-404 is for AD-12 · Belkin AVC002 · shelf C4”*.
-- Choosing the wrong unit is refused with a specific explanation, and your other choices stay as they were.
+- The list deliberately contains **every unit of that item type**, not just the one on the slip. If only the expected unit appeared, the check would become a “yes, it’s back” button that people click without looking. Having wrong but plausible options is what makes someone read the label.
+- Choosing the wrong unit is refused with a specific explanation, and your other choices stay as they were. A unit that is on the shelf gets *“… It should be on shelf B2. Check the label, or leave the slip open and ask the borrower.”* A unit on another loan gets the number of that slip.
+- **Units in repair stay in the list, marked “recorded in repair”.** A unit that should be in the workshop turning up at the counter means something is wrong: either the workshop record is out of date, or the unit left without a slip. The desk needs to be able to say so. Choosing one gives *“PR-06 is recorded as in repair, not on loan. Don’t shelve it. Check with the workshop, and leave slip L-402 open until PR-04 comes back.”* That way a broken unit is never sent back to the shelf.
 - For items not back yet, change **who has it** and **when it’s expected**. The slip stays open, keeps a history line (*“now with Leela Das (was Kabir Sen), due Sat 9 am (was Fri 8 pm)”*), and adds a matching entry to the desk book automatically.
 - Tick *Returned damaged* to send a unit straight to the workshop, so it can’t be lent again.
 
@@ -78,13 +80,12 @@ At a real counter, at the start of each shift, I’d count **how often staff hav
 | Inventory said “On loan” but not who had it | Shows holder and due time |
 | Requests stayed “Approved” for ever | Show live status: *Ready for pickup*, *Out*, *1 of 3 still out · with Leela Das*, *All returned* |
 | No overdue state despite an on-screen clock | *Overdue* / *Due now* / *Due within the hour*, plus a count on Today |
-| One-click return with no undo | Label check, plus one-step **Undo** |
-| Returns recorded nothing about condition | *Returned damaged* sends the unit to the workshop and logs it |
+| One-click return with no undo | Label check, plus one-step **Undo** || Returns recorded nothing about condition | *Returned damaged* sends the unit to the workshop and logs it |
 | “Restart sample shift” wiped everything in one click | Asks for confirmation |
 
 ## What I would do next
 
-- **Scan, don’t pick.** A barcode or QR label on each unit would make the label check a scan rather than a menu choice. The menu depends on staff actually reading the label; a scan wouldn’t.
+- **Type or scan the label, don’t pick it.** The dropdown has a known weakness: the slip already names the expected unit (“slip L-402 is for PR-04”), so someone could match the screen to the screen without looking at the device. A short box where staff **type the ID from the label** closes that gap, at a cost of a few keystrokes, and also catches unknown or misread labels. At a real counter this becomes a **barcode or QR scan**, which is both faster and impossible to answer without the device. I kept the dropdown in the prototype because it’s the quickest option at a busy counter.
 - **Reminders to the current holder.** Send them to Leela, not Kabir, when a slip is due.
 - **Reservations.** Warn when a unit going out now is booked for another club before it’s due back.
 - **Saved kits.** Issue a standard “screening kit” in one step.
