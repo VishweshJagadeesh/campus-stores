@@ -38,6 +38,8 @@ body > main {
   --mark: light-dark(#bd502f, #f2a585);
   --ok: light-dark(#e3f1e8, #2d4838);
   --oktxt: light-dark(#25523d, #bedac8);
+  --warn: light-dark(#fbe3dc, #4a2a22);
+  --warntxt: light-dark(#8a2c12, #f6c2b0);
   background: var(--paper);
   color: var(--ink);
   font:
@@ -263,6 +265,139 @@ body > main {
   background: var(--ok);
   color: var(--oktxt);
 }
+#campus-stores .warn {
+  background: var(--warn);
+  color: var(--warntxt);
+  font-weight: 600;
+}
+#campus-stores .soon {
+  background: var(--memo);
+  color: var(--memotxt);
+}
+#campus-stores .rowend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#campus-stores .history {
+  margin-top: 3px;
+  font-style: italic;
+}
+#campus-stores .subhead {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--quiet);
+}
+#campus-stores .empty {
+  color: var(--quiet);
+  padding: 6px 0;
+}
+#campus-stores .count {
+  margin-left: auto;
+  background: var(--mark);
+  color: var(--inv);
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 0 6px;
+}
+#campus-stores .panel {
+  margin-top: 16px;
+  padding: 4px 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+#campus-stores .panel .subhead {
+  margin-top: 12px;
+}
+#campus-stores fieldset {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 10px 0 0;
+  padding: 10px 0 0;
+  min-width: 0;
+}
+#campus-stores legend {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 6px;
+}
+#campus-stores .choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+#campus-stores .choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+#campus-stores .choices .choice {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  flex: 1 1 200px;
+}
+#campus-stores .choices .choice:has(input:checked) {
+  border-color: var(--sel);
+  background: var(--desk);
+}
+#campus-stores .choice small {
+  display: block;
+}
+#campus-stores .choice input {
+  margin: 3px 0 0;
+}
+#campus-stores .itemline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: end;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+#campus-stores .itemline label span {
+  font-size: 12px;
+  color: var(--quiet);
+}
+#campus-stores .itemline select {
+  width: 100%;
+}
+#campus-stores .itemline small {
+  display: block;
+}
+#campus-stores .form.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 4px 0 8px;
+}
+#campus-stores .checkin {
+  margin-top: 14px;
+}
+/* Once a returned unit's label is picked, the "still out" fields no longer apply. */
+#campus-stores .checkin:has(select[name^="label-"] option[value=""]:not(:checked)) .ifout {
+  opacity: 0.4;
+}
+#campus-stores .panel > button[type="submit"] {
+  margin-top: 12px;
+}
+#campus-stores .alert {
+  background: var(--warn);
+  color: var(--warntxt);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+#campus-stores .record.compact {
+  margin-top: 8px;
+}
 #campus-stores .record {
   margin-top: 14px;
   padding: 12px 13px;
@@ -350,6 +485,16 @@ body > main {
   #campus-stores .examstrip,
   #campus-stores .shift {
     padding: 9px 12px;
+  }
+  #campus-stores .form.three,
+  #campus-stores .itemline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #campus-stores .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #campus-stores .rowend {
+    justify-content: flex-start;
   }
 }
 @container (max-width:420px) {
