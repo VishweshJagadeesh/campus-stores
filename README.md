@@ -26,12 +26,12 @@ Campus Stores is a Product Engineer work sample set at a fictional campus media 
 
 ### The change: a kit page that follows the job, plus a Today view
 
-**1. Each request opens as a kit** (Requests → *Open kit*, or from Today). One screen shows each approved item, which unit went out, who has it and whether it’s back.
+**1. Each request opens as a kit** (Requests → *Open kit*, or from Today). One screen shows each approved item, which unit went out, who has it and whether it’s back. **Each item appears exactly once**, in the place where its next action happens: the issue form while it’s waiting, the check-in form while it’s out, and a *Back* list once returned. There’s no separate status list repeating the same items above the forms.
 
 **2. Issue the whole kit in one form.**
 - You pick the collector **once**, from people the club has authorised. Kabir appears with the reason: *“Named by Isha Rao in the desk book · Fri 3:20 pm.”*
 - Each item already has an on-shelf unit picked, with its model and shelf shown so you grab the right one.
-- The return time is filled in from the request.
+- The return time is filled in from the request. **Only return times later than the desk clock are offered**, so a loan can’t be created already overdue. If the request’s own time has passed, the form says so and asks for a new one.
 - Untick an item to issue the rest now and that one later.
 
 **3. Check in by reading the label, and hand over whatever is still out.**
@@ -40,11 +40,12 @@ Campus Stores is a Product Engineer work sample set at a fictional campus media 
 - Choosing the wrong unit is refused with a specific explanation, and your other choices stay as they were. A unit that is on the shelf gets *“… It should be on shelf B2. Check the label, or leave the slip open and ask the borrower.”* A unit on another loan gets the number of that slip.
 - **Units in repair stay in the list, marked “recorded in repair”.** A unit that should be in the workshop turning up at the counter means something is wrong: either the workshop record is out of date, or the unit left without a slip. The desk needs to be able to say so. Choosing one gives *“PR-06 is recorded as in repair, not on loan. Don’t shelve it. Check with the workshop, and leave slip L-402 open until PR-04 comes back.”* That way a broken unit is never sent back to the shelf.
 - For items not back yet, change **who has it** and **when it’s expected**. The slip stays open, keeps a history line (*“now with Leela Das (was Kabir Sen), due Sat 9 am (was Fri 8 pm)”*), and adds a matching entry to the desk book automatically.
-- Tick *Returned damaged* to send a unit straight to the workshop, so it can’t be lent again.
+- Moving a loan to a new holder also accepts only a future return time. A loan that is already overdue keeps its current time, marked *(passed)*, so leaving it unchanged is not mistaken for a new promise.
+- Tick *Returned damaged* to send a unit straight to the workshop, so it can’t be lent again. When it’s fixed, **Back from workshop** in Inventory returns it to stock and adds a desk-book entry. That can be undone too.
 
-**4. A Today tab for whoever takes over.** It shows what’s expected back, sorted by due time and marked *Overdue* / *Due now* against the desk clock, plus what’s waiting for pickup and the latest handover entries. The tab shows a count when something needs attention.
+**4. A Today tab for whoever takes over.** It shows what’s expected back, sorted by due time and marked *Overdue* / *Due now* against the desk clock, plus what’s waiting for pickup and the latest handover entries **left before the current desk time**. A note you’ve just written doesn’t show up as a handover to yourself. The tab shows a count when something needs attention.
 
-**5. Undo.** Any issue or check-in can be undone once from the status bar.
+**5. Undo.** Any issue, check-in or workshop return can be undone once from the status bar.
 
 ### The same job, using the change
 
@@ -73,14 +74,15 @@ At a real counter, at the start of each shift, I’d count **how often staff hav
 |---|---|
 | Request, collector and due time re-entered for every item | Entered once per kit |
 | Unit list ignored the request, so mistakes appeared only after saving | Each item shows only on-shelf units of its own type |
-| Due time not filled in from the request | Filled in, still editable |
+| Due time not filled in from the request, and any time could be chosen | Filled in, and only times later than now are offered |
 | Anyone could collect for any club (e.g. Tara collecting the Film Society kit) | Collector chosen from the club’s authorised people |
 | Errors shown in the status bar at the bottom of the page | Errors appear at the top of the form, receive focus, and keep your choices |
 | Register rows showed IDs only | Rows show item type, model, holder, collector, due status and history |
 | Inventory said “On loan” but not who had it | Shows holder and due time |
 | Requests stayed “Approved” for ever | Show live status: *Ready for pickup*, *Out*, *1 of 3 still out · with Leela Das*, *All returned* |
 | No overdue state despite an on-screen clock | *Overdue* / *Due now* / *Due within the hour*, plus a count on Today |
-| One-click return with no undo | Label check, plus one-step **Undo** || Returns recorded nothing about condition | *Returned damaged* sends the unit to the workshop and logs it |
+| One-click return with no undo | Label check, plus one-step **Undo** |
+| Returns recorded nothing about condition | *Returned damaged* sends the unit to the workshop and logs it |
 | “Restart sample shift” wiped everything in one click | Asks for confirmation |
 
 ## What I would do next

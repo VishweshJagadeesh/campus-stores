@@ -380,6 +380,21 @@ body > main {
 #campus-stores .checkin {
   margin-top: 14px;
 }
+#campus-stores .checkin .row {
+  border-top: 0;
+  padding-top: 0;
+}
+#campus-stores .itemline > .tag {
+  justify-self: end;
+}
+#campus-stores .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 /* Once a returned unit's label is picked, the "still out" fields no longer apply. */
 #campus-stores .checkin:has(select[name^="label-"] option[value=""]:not(:checked)) .ifout {
   opacity: 0.4;

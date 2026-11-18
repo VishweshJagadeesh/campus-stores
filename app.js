@@ -279,15 +279,21 @@
         "</small>"
       : "";
   const sub = (title) => '<h3 class="subhead">' + esc(title) + "</h3>";
-  const dueSelect = (name, selected) =>
+  // Only return times still ahead of the desk clock are offered. `keep` is a
+  // loan's current due time, which stays selectable (marked if already past)
+  // so leaving it unchanged is never mistaken for a new due time.
+  const dueSelect = (name, selected, keep = "") =>
     '<select name="' +
     esc(name) +
     '">' +
     opts(
-      dueTimes.map(([d]) => [d, d]),
+      dueTimes
+        .filter(([d, t]) => t > now().at || d === keep)
+        .map(([d, t]) => [d, t > now().at ? d : d + " (passed)"]),
       selected,
     ) +
     "</select>";
+  const isFuture = (due) => dueAt(due) > now().at;
 
   // A loan row that is the same wherever an outstanding slip is shown.
   function loanRow(l, withOpen = true) {
@@ -301,6 +307,8 @@
     return row(
       a.type + " · " + a.id,
       a.model +
+        " · shelf " +
+        a.bin +
         " · L-" +
         l.num +
         " · " +
@@ -345,9 +353,11 @@
           .join("")
       : '<p class="empty">Every approved request has been issued.</p>';
 
-    const notes = deskEntries().filter((e) => e.handover);
+    // Only what was left before the current desk time; anything written now
+    // is already in front of the person who wrote it.
+    const notes = deskEntries().filter((e) => e.handover && e.at < t.at);
     if (notes.length) {
-      html += sub("Handover from earlier shifts");
+      html += sub("Handover from earlier");
       html += notes
         .slice(-3)
         .reverse()
@@ -401,24 +411,16 @@
       badge(state, kind) +
       "</p></div>";
 
-    html += sub("Kit");
-    for (const type of r.items) {
-      const l = slipFor(r.id, type);
-      if (l) html += loanRow(l, false);
-      else
-        html += row(
-          type,
-          "Not issued · " +
-            unitsOf(type).filter(onShelf).length +
-            " on the shelf",
-          badge("To issue"),
-        );
-    }
-
+    // Each approved item appears exactly once, in the place where its next
+    // action happens: the issue form, the check-in form, or the "Back" list.
     const pending = pendingTypes(r);
     if (pending.length) html += issueForm(r, pending);
-    const outNow = loansFor(r.id).filter((l) => !l.back);
+    const slips = r.items.map((t) => slipFor(r.id, t)).filter(Boolean);
+    const outNow = slips.filter((l) => !l.back);
     if (outNow.length) html += checkInForm(r, outNow);
+    const back = slips.filter((l) => l.back);
+    if (back.length)
+      html += sub("Back") + back.map((l) => loanRow(l, false)).join("");
     return html;
   }
 
@@ -447,7 +449,9 @@
           return (
             '<div class="itemline"><span><b>' +
             esc(type) +
-            "</b><small>None on the shelf. Issue the rest now and this item later.</small></span></div>"
+            "</b><small>None on the shelf. Issue the rest now and this item later.</small></span>" +
+            badge("Not issued") +
+            "</div>"
           );
         return (
           '<div class="itemline"><label class="choice"><input type="checkbox" name="take-' +
@@ -478,6 +482,11 @@
       '<div class="form"><label><span>Return by</span>' +
       dueSelect("due", r.due) +
       "</label></div>" +
+      (isFuture(r.due)
+        ? ""
+        : "<p><small>The request’s return time (" +
+          esc(r.due) +
+          ") has passed. Agree a new one with the club.</small></p>") +
       '<button type="submit" class="primary">Issue selected items</button></form>'
     );
   }
@@ -489,15 +498,11 @@
       .map((l) => {
         const a = getAsset(l.asset);
         return (
-          '<fieldset class="checkin"><legend><b>' +
-          esc(a.type) +
-          "</b> · slip L-" +
-          l.num +
-          " is for <b>" +
-          esc(unitName(a)) +
-          "</b> · shelf " +
-          esc(a.bin) +
-          '</legend><div class="form three"><label><span>Label on the unit at the counter</span><select name="label-' +
+          '<fieldset class="checkin"><legend class="visually-hidden">' +
+          esc(a.type + " · slip L-" + l.num) +
+          "</legend>" +
+          loanRow(l, false) +
+          '<div class="form three"><label><span>Label on the unit at the counter</span><select name="label-' +
           l.num +
           '"><option value="">Not back yet</option>' +
           // Every unit of the type is listed, so the choice only matches the
@@ -517,7 +522,7 @@
             l.holder,
           ) +
           "</select></label><label class=\"ifout\"><span>Expected back</span>" +
-          dueSelect("due-" + l.num, l.due) +
+          dueSelect("due-" + l.num, l.due, l.due) +
           '</label></div><label class="choice"><input type="checkbox" name="dmg-' +
           l.num +
           '"> Returned damaged. Send to the workshop.</label></fieldset>'
@@ -528,7 +533,7 @@
       '<form data-checkin data-req="' +
       esc(r.id) +
       '" class="panel">' +
-      sub("Check in and hand over") +
+      sub("Out · check in or hand over") +
       "<p><small>Read the ID label on each unit that comes back. Leave the rest as “Not back yet” and say who has them, so the next shift knows who to expect.</small></p>" +
       rows +
       '<button type="submit" class="primary">Save check-in</button></form>'
@@ -557,7 +562,10 @@
           " · shelf " +
           a.bin +
           (l ? " · with " + l.holder + " · due " + l.due : ""),
-        badge(status, status === "On shelf" ? "good" : ""),
+        badge(status, status === "On shelf" ? "good" : "") +
+          (status === "In repair"
+            ? btn("Back from workshop", "repaired", a.id)
+            : ""),
       );
     }
     return html;
@@ -753,6 +761,18 @@
       case "scope":
         s.onlyOpen = v === "0";
         break;
+      case "repaired": {
+        const a = getAsset(v);
+        if (!a || !inRepair(v)) return;
+        snapshot("workshop return of " + v);
+        s.repair = s.repair.filter((id) => id !== v);
+        record(
+          "Counter",
+          v + " came back from the workshop and is on shelf " + a.bin + ".",
+        );
+        s.notice = v + " is back from the workshop. Return it to shelf " + a.bin + ".";
+        break;
+      }
       case "undo": {
         if (!s.undo) return;
         const { label, loans, repair, log } = s.undo;
@@ -794,8 +814,11 @@
     const due = form.get("due");
     if (!r.authorised.some(([name]) => name === who))
       return showError(f, "Choose who is collecting the kit.");
-    if (dueAt(due) === undefined)
-      return showError(f, "Choose when the kit is due back.");
+    if (!isFuture(due))
+      return showError(
+        f,
+        "Choose a return time after " + now().time.replace(" · ", " ") + ".",
+      );
     const picks = [];
     pendingTypes(r).forEach((type, i) => {
       if (form.get("take-" + i) !== type) return;
@@ -882,6 +905,15 @@
       const due = form.get("due-" + l.num);
       if (!people.includes(holder) || dueAt(due) === undefined)
         return showError(f, "Choose who has " + a.id + " and when it is due back.");
+      if (due !== l.due && !isFuture(due))
+        return showError(
+          f,
+          "The new return time for " +
+            a.id +
+            " has already passed. Choose a time after " +
+            now().time.replace(" · ", " ") +
+            ".",
+        );
       if (holder !== l.holder || due !== l.due) moves.push([l, holder, due]);
     }
     if (!returns.length && !moves.length)
